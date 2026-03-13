@@ -1,0 +1,50 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background-color: var(--color-white);
+  /* Constrain to a max width on large screens and centre */
+  max-width: 480px;
+  margin: 0 auto;
+  /* Subtle shadow on wide screens to frame the mobile layout */
+  box-shadow: var(--shadow-md);
+}
+
+.header {
+  padding: 14px var(--space-xl) var(--space-sm);
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-grey-2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.pageTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.footerSpacer {
+  height: 120px;
+}
+
+@media (min-width: 768px) {
+  .page {
+    margin-top: 32px;
+    border-radius: var(--radius-lg);
+    min-height: auto;
+    height: 90vh;
+    overflow: hidden;
+  }
+
+  .content {
+    overflow-y: auto;
+  }
+}
