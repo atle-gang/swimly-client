@@ -1,0 +1,55 @@
+.strip {
+  display: flex;
+  gap: 6px;
+  padding: var(--space-sm) var(--space-xl) var(--space-xs);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.strip::-webkit-scrollbar {
+  display: none;
+}
+
+.dayBtn {
+  flex-shrink: 0;
+  width: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0;
+  border-radius: var(--radius-md);
+  background-color: var(--color-grey-1);
+  border: 1.5px solid transparent;
+  color: var(--color-grey-4);
+  transition: background-color 0.15s ease, color 0.15s ease;
+  /* Minimum tap target */
+  min-height: 56px;
+}
+
+.dayBtn:hover {
+  background-color: var(--color-grey-2);
+}
+
+.dayLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.dayNum {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-grey-5);
+}
+
+/* Active state — teal background */
+.dayBtn.active {
+  background-color: var(--color-teal);
+  border-color: var(--color-teal);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dayBtn.active .dayNum {
+  color: var(--color-white);
+}
