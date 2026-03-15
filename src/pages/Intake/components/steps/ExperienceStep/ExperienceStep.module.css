@@ -1,0 +1,185 @@
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-grey-4);
+}
+
+.optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--font-size-xs);
+}
+
+/* ── Experience cards ── */
+.expCards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.expCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-grey-2);
+  background-color: var(--color-white);
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  min-height: 56px;
+}
+
+.expCard:hover {
+  border-color: var(--color-teal);
+}
+
+.expCard.expCardSelected {
+  border-color: var(--color-teal);
+  background-color: var(--color-teal-lt);
+}
+
+.expText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.expTitle {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.expDesc {
+  font-size: var(--font-size-sm);
+  color: var(--color-grey-4);
+}
+
+.expCheck {
+  color: var(--color-grey-3);
+  flex-shrink: 0;
+  display: flex;
+}
+
+.expCard.expCardSelected .expCheck {
+  color: var(--color-teal);
+}
+
+/* ── Safety banner ── */
+.safetyBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 12px 14px;
+  background-color: var(--color-red-lt);
+  border: 1.5px solid #f5c6c0;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #8b2a1a;
+}
+
+/* ── Medical checklist ── */
+.checkList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-grey-2);
+  background-color: var(--color-white);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  min-height: 44px;
+}
+
+.checkRow:hover {
+  border-color: var(--color-grey-3);
+}
+
+.checkRow.checkRowActive {
+  border-color: var(--color-amber);
+  background-color: #fef9f0;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--color-grey-3);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+}
+
+.checkbox.checkboxChecked {
+  background-color: var(--color-amber);
+  border-color: var(--color-amber);
+}
+
+.checkLabel {
+  font-size: var(--font-size-base);
+  color: var(--color-grey-5);
+}
+
+.checkRow.checkRowActive .checkLabel {
+  color: var(--color-navy);
+  font-weight: 500;
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-grey-2);
+  background-color: var(--color-grey-1);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--color-navy);
+  line-height: 1.5;
+  resize: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-teal);
+  background-color: var(--color-white);
+}
+
+.errorMsg {
+  font-size: var(--font-size-sm);
+  color: var(--color-red);
+}
