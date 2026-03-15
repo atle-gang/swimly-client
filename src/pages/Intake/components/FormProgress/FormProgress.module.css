@@ -1,0 +1,68 @@
+.header {
+  padding: 14px var(--space-xl) var(--space-md);
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-grey-2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stepLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-grey-4);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stepName {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.track {
+  height: 4px;
+  background-color: var(--color-grey-2);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background-color: var(--color-teal);
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
+}
+
+.dots {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-grey-2);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dot.done {
+  background-color: var(--color-teal);
+}
+
+.dot.current {
+  background-color: var(--color-teal);
+  box-shadow: 0 0 0 3px rgba(26, 122, 138, 0.2);
+}
