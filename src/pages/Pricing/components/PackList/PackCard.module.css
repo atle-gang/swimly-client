@@ -1,0 +1,118 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 14px var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--color-grey-2);
+  background-color: var(--color-white);
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--color-teal);
+}
+
+/* Featured (best value) state */
+.card.featured {
+  border-color: var(--color-teal);
+  background-color: var(--color-teal-lt);
+}
+
+/* Selected state — user has tapped the card */
+.card.selected {
+  border-color: var(--color-navy);
+  background-color: #edf1f6;
+}
+
+/* Best value badge — anchored to top of card */
+.badge {
+  position: absolute;
+  top: -1px;
+  right: 14px;
+  background-color: var(--color-teal);
+  color: var(--color-white);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 0 0 8px 8px;
+  letter-spacing: 0.08em;
+}
+
+/* Icon block — pill showing lesson count */
+.iconBlock {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-grey-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card.featured .iconBlock {
+  background-color: rgba(26, 122, 138, 0.15);
+}
+
+.lessonCount {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-navy);
+  line-height: 1;
+}
+
+.lessonLabel {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--color-grey-4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Pack name + description */
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-navy);
+  margin-bottom: 2px;
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  color: var(--color-grey-4);
+}
+
+/* Price column */
+.priceBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.price {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-teal);
+}
+
+.perLesson {
+  font-size: var(--font-size-xs);
+  color: var(--color-grey-4);
+}
+
+.saving {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-green);
+}
