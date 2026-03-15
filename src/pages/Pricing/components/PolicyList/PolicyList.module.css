@@ -1,0 +1,23 @@
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-xl);
+}
+
+.icon {
+  color: var(--color-grey-4);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.text {
+  font-size: var(--font-size-sm);
+  color: var(--color-grey-4);
+  line-height: 1.5;
+}

@@ -1,0 +1,25 @@
+.box {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin: var(--space-md) var(--space-xl) 0;
+  padding: var(--space-md) 14px;
+  background-color: #f5efe6;
+  border-radius: var(--radius-lg);
+}
+
+.icon {
+  color: var(--color-amber);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.text {
+  font-size: var(--font-size-sm);
+  color: var(--color-grey-5);
+  line-height: 1.6;
+}
+
+.text strong {
+  color: var(--color-navy);
+}
