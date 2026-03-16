@@ -1,0 +1,25 @@
+.container {
+  padding-bottom: var(--space-lg);
+}
+
+.sectionLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-grey-4);
+  padding: var(--space-xl) var(--space-xl) var(--space-sm);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: 0 var(--space-xl);
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--color-grey-2);
+  margin: var(--space-md) var(--space-xl);
+}
