@@ -11,3 +11,47 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  user_id      String         @id @default(cuid())
+  name         String         @unique @db.VarChar(256)
+  surname      String         @unique @db.VarChar(256)
+  username     String         @unique @db.VarChar(256)
+  email        String         @unique @db.VarChar(256)
+  password     String         @db.VarChar(256)
+  balance      Balance?
+  transactions Transaction[]
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @updatedAt
+}
+
+model Balance {
+  balance_id  Int       @id @default(autoincrement())
+  user_id     String    @unique
+  user        User?     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  balance     Int       @default(0)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+}
+
+model Transaction {
+  transaction_id      Int         @id @default(autoincrement())
+  user_id             String
+  children_names      String[]
+  health_concerns     String[]
+  transaction_date    DateTime
+  payment_type        String
+  lesson_date         DateTime
+  lesson_time         String
+  nap_times           String[]
+  point_amount        Int?
+  money_amount        Decimal?    @db.Decimal(10, 2)
+  lesson_status       String
+  user                User?       @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([transaction_date])
+  @@index([payment_type])
+  @@index([lesson_date])
+  @@index([lesson_status])
+}
