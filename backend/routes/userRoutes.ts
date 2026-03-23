@@ -32,6 +32,7 @@ router.post('/register', async (req, res, next) => {
         const payload = {
             user: {
                 id: userId,
+                username: username,
                 email: email,
             }
         };
@@ -80,6 +81,7 @@ router.post('/login', async (req, res, next) => {
             const payload = {
                 user: {
                     id: userId,
+                    username: username,
                     email: email,
                 }
             };
@@ -136,7 +138,7 @@ router.put("/change-password", async (req, res, next) => {
             });
             
             const payload = {
-                user: {userId: changePassword.user_id}
+                user: {id: changePassword.user_id}
             };
             const authToken = jwt.sign(payload, process.env.JWT_SECRET);
 
@@ -173,7 +175,7 @@ router.put("/reset-password", async (req, res, next) => {
 
             const payload = {
                 user: {
-                    userId: resetUserPassword.user_id,
+                    id: resetUserPassword.user_id,
                     email: email
                 }
             };
