@@ -34,16 +34,20 @@ router.patch("/user/balance", async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.user.id;
 
-        const updateBalance = await prisma.$primary().balance.update({
+        const updateBalance = await prisma.$primary().balance.upsert({
             where: {user_id: userId},
-            data: {
+            update: {
                 balance: {increment: req.body.delta}
+            },
+            create: {
+                user: {connect: {user_id: userId}},
+                balance: {increment: req.body.delta},
             }
         })
 
         return res.status(200).json({
             message: "Balance updated successfully",
-            balance: upateBalance.balance
+            balance: updateBalance.balance
         });
     } catch (error) {
         next(error);

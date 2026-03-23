@@ -28,7 +28,7 @@ model User {
 model Balance {
   balance_id  Int       @id @default(autoincrement())
   user_id     String    @unique
-  user        User?     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user        User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   balance     Int       @default(0)
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
@@ -46,12 +46,10 @@ model Transaction {
   nap_times           String[]
   point_amount        Int?
   money_amount        Decimal?    @db.Decimal(10, 2)
-  lesson_status       String
-  user                User?       @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user                User        @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([transaction_date])
   @@index([payment_type])
   @@index([lesson_date])
-  @@index([lesson_status])
 }
