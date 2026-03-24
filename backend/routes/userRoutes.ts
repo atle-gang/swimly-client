@@ -1,210 +1,232 @@
-import { Router } from 'express';
+// routes/userRoutes.ts
+import { Router, Request, Response, NextFunction } from 'express';
 import { config } from 'dotenv';
-import jwt from 'jsonwebtoken';
-import bcryptjs from 'bcryptjs';
-import prisma from "../client";
-
+const jwt = require('jsonwebtoken');
+const bcryptjs = require('bcryptjs');
+import { prisma } from '../client';
 
 config();
 
+interface RegisterBody {
+  name: string;
+  surname: string;
+  username: string;
+  email: string;
+  password: string;
+}
+
+interface LoginBody {
+  email: string;
+  password: string;
+}
+
+interface ChangePasswordBody {
+  currentPassword: string;
+  newPassword: string;
+}
+
+interface ResetPasswordBody {
+  email: string;
+  newPassword: string;
+}
+
+interface AuthTokenPayload {
+  user: {
+    id: string;
+    username?: string;
+    email?: string;
+  };
+}
+
 const router = Router();
 
-router.post('/register', async (req, res, next) => {
+router.post(
+  '/register',
+  async (req: Request<{}, any, RegisterBody>, res: Response, next: NextFunction) => {
     try {
-        const name = req.body.name;
-        const surname = req.body.surname;
-        const username = req.body.username;
-        const email = req.body.email;
-        const genSalt = await bcryptjs.genSalt();
-        const hash = await bcryptjs.hash(req.body.password, genSalt);
+      const { name, surname, username, email, password } = req.body;
 
-        const newUser = await prisma.$primary().user.create({
-            data: {
-                name: name,
-                surname: surname,
-                username: username,
-                email: email,
-                password: hash
-            }
-        });
+      const genSalt = await bcryptjs.genSalt();
+      const hash = await bcryptjs.hash(password, genSalt);
 
-        const userId = newUser.user_id;
-        const payload = {
-            user: {
-                id: userId,
-                username: username,
-                email: email,
-            }
-        };
-        const authToken = jwt.sign(
-            payload, 
-            process.env.JWT_SECRET, 
-            {
-                expiresIn: "1h",
-            }
-        );
-
-        return res.status(201).json({
-            message: `User create with email ${email} created successfully`,
-            name: name,
-            surname: surname,
-            username: username,
-            email: email,
-            userId: userId,
-            authToken: authToken,
-            expiresIn: 3600000,
-            expiresAt: Date.now() + 3600000
-        });
-    } catch (error) {
-        next(error);
-    }
-});
-
-router.post('/login', async (req, res, next) => {
-    try {
-        const email = req.body.email;
-        const password = req.body.password;
-        const existingUser = await prisma.$replica().user.findUnique({
-            where: {email: email}
-        });
-        
-        if (!existingUser) {
-            return res.status(404).message("User does not exist");
+      const newUser = await prisma.$primary().user.create({
+        data: {
+          name,
+          surname,
+          username,
+          email,
+          password: hash,
+          balance: {
+            create: {},
+          },
         }
+      });
 
-        const result = await bcryptjs.compare(password, existingUser.password);
+      const userId = newUser.user_id;
+      const payload: AuthTokenPayload = {
+        user: { id: userId, username, email },
+      };
+      const authToken = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1h' });
 
-        if (!result) {
-            return res.status(401).message("Wrong password");
-        } else {
-            const userId = existingUser.user_id;
-            const payload = {
-                user: {
-                    id: userId,
-                    username: username,
-                    email: email,
-                }
-            };
-            const authToken = jwt.sign(
-                payload, 
-                process.env.JWT_SECRET, 
-                {
-                    expiresIn: "1h",
-                }
-            );
-
-            return res.status(201).json({
-                message: `User create with email ${email} successfully logged in`,
-                name: existingUser.name,
-                surname: existingUser.surname,
-                username: existingUser.username,
-                email: email,
-                userId: userId,
-                authToken: authToken,
-                expiresIn: 3600000,
-                expiresAt: Date.now() + 3600000
-            });
-        }
+      return res.status(201).json({
+        message: `User with email ${email} successfully created`,
+        name,
+        surname,
+        username,
+        email,
+        userId,
+        authToken,
+        expiresIn: 3600000,
+        expiresAt: Date.now() + 3600000,
+      });
     } catch (error) {
-        next(error);
+      next(error);
     }
-});
+  },
+);
 
-router.patch("/change-password", async (req, res, next) => {
+router.post(
+  '/login',
+  async (req: Request<{}, any, LoginBody>, res: Response, next: NextFunction) => {
     try {
-        const authHeader = req.header("Authorization");
-        const token = authHeader.replace("Bearer ", "");
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.user.id;
+      const { email, password } = req.body;
 
-        const currentUser = await prisma.$replica().user.findUnique({
-            where: {user_id: userId}
-        });
+      const existingUser = await prisma.$replica().user.findUnique({ where: { email } });
 
-        const currentPassword = req.body.currentPassword;
-        const newPassword = req.body.newPassword;
+      if (!existingUser) {
+        return res.status(404).json({ message: 'User does not exist' });
+      }
 
-        const result = await bcryptjs.compare(currentPassword, currentUser.password);
+      const result = await bcryptjs.compare(password, existingUser.password);
 
-        if (!result) {
-            return res.status(401).message("Password does not match");
-        } else {
-            const genSalt = await bcryptjs.genSalt();
-            const newHash = await bcryptjs.hash(newPassword, genSalt);
+      if (!result) {
+        return res.status(401).json({ message: 'Wrong password' });
+      }
 
-            const changePassword = await prisma.$primary().user.update({
-                where: {user_id: userId},
-                data: {password: newHash}
-            });
-            
-            const payload = {
-                user: {id: changePassword.user_id}
-            };
-            const authToken = jwt.sign(payload, process.env.JWT_SECRET);
+      const userId = existingUser.user_id;
+      const payload: AuthTokenPayload = {
+        user: { id: userId, username: existingUser.username, email },
+      };
+      const authToken = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1h' });
 
-            return res.status(200).json({
-                message: "Password changed successfully",
-                authToken: authToken,
-                username: changePassword.username
-            });
-        }
+      return res.status(200).json({
+        message: `User with email ${email} successfully logged in`,
+        name: existingUser.name,
+        surname: existingUser.surname,
+        username: existingUser.username,
+        email,
+        userId,
+        authToken,
+        expiresIn: 3600000,
+        expiresAt: Date.now() + 3600000,
+      });
     } catch (error) {
-        next(error);
+      next(error);
     }
-});
+  },
+);
 
-router.patch("/reset-password", async (req, res, next) => {
+router.patch(
+  '/change-password',
+  async (req: Request<{}, any, ChangePasswordBody>, res: Response, next: NextFunction) => {
     try {
-        const email = req.body.email;
-        const newPassword = req.body.newPassword;
+      const authHeader = req.header('Authorization');
+      const token = authHeader!.replace('Bearer ', '');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthTokenPayload;
+      const userId = decoded.user.id;
 
-        const existingUser = await prisma.$replica().user.findUnique({
-            where: {email: email}
-        })
+      const currentUser = await prisma.$replica().user.findUnique({ where: { user_id: userId } });
 
-        if (!existingUser) {
-            return res.status(404).message("User not found");
-        } else {
-            const genSalt = await bcryptjs.genSalt();
-            const newHash = await bcryptjs.hash(newPassword, genSalt);
+      if (!currentUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
 
-            const resetUserPassword = await prisma.$primary().user.update({
-                where: {email: email},
-                data: {password: newHash}
-            });
+      const { currentPassword, newPassword } = req.body;
+      const result = await bcryptjs.compare(currentPassword, currentUser.password);
 
-            const payload = {
-                user: {
-                    id: resetUserPassword.user_id,
-                    email: email
-                }
-            };
-            const authToken = jwt.sign(payload, process.env.JWT_SECRET);
+      if (!result) {
+        return res.status(401).json({ message: 'Password does not match' });
+      }
 
-            return res.status(200).json({
-                message: "Password reset successfully",
-                authToken: authToken,
-                email: email
-            })
-        }
+      const genSalt = await bcryptjs.genSalt();
+      const newHash = await bcryptjs.hash(newPassword, genSalt);
+
+      const updatedUser = await prisma.$primary().user.update({
+        where: { user_id: userId },
+        data: { password: newHash },
+      });
+
+      const payload: AuthTokenPayload = { user: { id: updatedUser.user_id } };
+      const authToken = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1h' });
+
+      return res.status(200).json({
+        message: 'Password changed successfully',
+        authToken,
+        username: updatedUser.username,
+      });
     } catch (error) {
-        next(error);
+      next(error);
     }
-});
+  },
+);
 
-router.delete("/delete", async (req, res, next) => {
+router.patch(
+  '/reset-password',
+  async (req: Request<{}, any, ResetPasswordBody>, res: Response, next: NextFunction) => {
     try {
-        const authHeader = req.header("Authorization");
-        const token = authHeader.replace("Bearer ", "");
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.user.id;
+      const { email, newPassword } = req.body;
 
-        await prisma.$primary().user.delete({ where: {user_id: userId} });
+      const existingUser = await prisma.$replica().user.findUnique({ where: { email } });
 
-        return res.status(200).message("User deleted successfully");
+      if (!existingUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const genSalt = await bcryptjs.genSalt();
+      const newHash = await bcryptjs.hash(newPassword, genSalt);
+
+      const updatedUser = await prisma.$primary().user.update({
+        where: { email },
+        data: { password: newHash },
+      });
+
+      const payload: AuthTokenPayload = { user: { id: updatedUser.user_id, email } };
+      const authToken = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1h' });
+
+      return res.status(200).json({
+        message: 'Password reset successfully',
+        authToken,
+        email,
+      });
     } catch (error) {
-        next(error);
+      next(error);
     }
+  },
+);
+
+router.delete('/delete', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // 1. Extract token
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    // 2. Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthTokenPayload;
+    const userId = decoded.user.id; // adjust according to your payload structure
+
+    // 3. Delete user (cascade will handle balance & transactions)
+    await prisma.$primary().user.delete({ where: { user_id: userId } });
+
+    return res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    next(error);
+  }
 });
 
 export { router as userRoutes };
