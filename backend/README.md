@@ -21,7 +21,7 @@ npx prisma migrate dev; npx prisma generate
 ### 3. Run the server.
 
 ```bash
-npx tsc server.ts
+npm run dev
 ```
 
 ---
