@@ -110,7 +110,7 @@ router.post('/login', async (req, res, next) => {
     }
 });
 
-router.put("/change-password", async (req, res, next) => {
+router.patch("/change-password", async (req, res, next) => {
     try {
         const authHeader = req.header("Authorization");
         const token = authHeader.replace("Bearer ", "");
@@ -153,7 +153,7 @@ router.put("/change-password", async (req, res, next) => {
     }
 });
 
-router.put("/reset-password", async (req, res, next) => {
+router.patch("/reset-password", async (req, res, next) => {
     try {
         const email = req.body.email;
         const newPassword = req.body.newPassword;
@@ -206,3 +206,5 @@ router.delete("/delete", async (req, res, next) => {
         next(error);
     }
 });
+
+export { router as userRoutes };

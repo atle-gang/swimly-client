@@ -8,7 +8,7 @@ config();
 
 const router = Router();
 
-router.post("/user/transactions", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
     try {
         const authHeader = req.header("Authorization");
 
@@ -48,7 +48,7 @@ router.post("/user/transactions", async (req, res, next) => {
     }
 });
 
-router.get("/user/transactions", async (req, res, next) => {
+router.get("/data", async (req, res, next) => {
     try {
         const authHeader = req.header("Authorization");
 
@@ -80,3 +80,5 @@ router.get("/user/transactions", async (req, res, next) => {
         next(error);
     }
 });
+
+export { router as transactionRoutes };
