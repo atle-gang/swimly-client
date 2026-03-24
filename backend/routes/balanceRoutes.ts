@@ -8,7 +8,7 @@ config();
 
 const router = Router();
 
-router.get("/user/balance", async (req, res, next) => {
+router.get("/data", async (req, res, next) => {
     try {
         const authHeader = req.header("Authorization");
 
@@ -26,7 +26,7 @@ router.get("/user/balance", async (req, res, next) => {
     }
 });
 
-router.patch("/user/balance", async (req, res, next) => {
+router.patch("/update", async (req, res, next) => {
     try {
         const authHeader = req.header("Authorization");
 
@@ -53,3 +53,5 @@ router.patch("/user/balance", async (req, res, next) => {
         next(error);
     }
 });
+
+export { router as balanceRoutes };
