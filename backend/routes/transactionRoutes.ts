@@ -9,10 +9,19 @@ interface AuthTokenPayload {
   user: { id: string };
 }
 
+interface Children {
+  name: string;
+  age: number;
+}
+
+interface HealthConcern {
+  name: string;
+  concern: string | null;
+}
+
 interface CreateTransactionBody {
-  children_names: string[];
-  health_concerns: string[];
-  transaction_date: string | Date;
+  children_names: Children[];
+  health_concerns: HealthConcern[] | null;
   payment_type: string;
   lesson_date: string | Date;
   lesson_time: string;
@@ -37,7 +46,7 @@ router.post(
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthTokenPayload;
       const userId = decoded.user.id;
 
-      const existingUser = await prisma.$replica().user.findUnique({ where: { user_id: userId } });
+      const existingUser = await prisma.user.findUnique({ where: { user_id: userId } });
 
       if (!existingUser) {
         return res.status(404).json({ message: 'User not found' });
@@ -46,14 +55,13 @@ router.post(
       const point_amount = req.body.point_amount ?? null;
       const money_amount = req.body.money_amount ?? null;
 
-      await prisma.$primary().transaction.create({
+      await prisma.transaction.create({
         data: {
           user: { connect: { user_id: userId } },
-          children_names: req.body.children_names,
-          health_concerns: req.body.health_concerns,
-          transaction_date: req.body.transaction_date,
+          children_names: JSON.stringify(req.body.children_names),
+          health_concerns: JSON.stringify(req.body.health_concerns) ?? null,
           payment_type: req.body.payment_type,
-          lesson_date: req.body.lesson_date,
+          lesson_date: new Date(req.body.lesson_date),
           lesson_time: req.body.lesson_time,
           nap_times: req.body.nap_times,
           point_amount,
@@ -81,7 +89,7 @@ router.get(
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthTokenPayload;
       const userId = decoded.user.id;
 
-      const existingUser = await prisma.$replica().user.findUnique({ where: { user_id: userId } });
+      const existingUser = await prisma.user.findUnique({ where: { user_id: userId } });
 
       if (!existingUser) {
         return res.status(404).json({ message: 'User not found' });
@@ -91,7 +99,7 @@ router.get(
       const limit = parseInt(req.query.limit ?? '10', 10);
       const skip = (page - 1) * limit;
 
-      const transactions = await prisma.$replica().transaction.findMany({
+      const transactions = await prisma.transaction.findMany({
         where: { user_id: userId },
         skip,
         take: limit,

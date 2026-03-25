@@ -49,7 +49,7 @@ router.post(
       const genSalt = await bcryptjs.genSalt();
       const hash = await bcryptjs.hash(password, genSalt);
 
-      const newUser = await prisma.$primary().user.create({
+      const newUser = await prisma.user.create({
         data: {
           name,
           surname,
@@ -91,7 +91,7 @@ router.post(
     try {
       const { email, password } = req.body;
 
-      const existingUser = await prisma.$replica().user.findUnique({ where: { email } });
+      const existingUser = await prisma.user.findUnique({ where: { email } });
 
       if (!existingUser) {
         return res.status(404).json({ message: 'User does not exist' });
@@ -135,7 +135,7 @@ router.patch(
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthTokenPayload;
       const userId = decoded.user.id;
 
-      const currentUser = await prisma.$replica().user.findUnique({ where: { user_id: userId } });
+      const currentUser = await prisma.user.findUnique({ where: { user_id: userId } });
 
       if (!currentUser) {
         return res.status(404).json({ message: 'User not found' });
@@ -151,7 +151,7 @@ router.patch(
       const genSalt = await bcryptjs.genSalt();
       const newHash = await bcryptjs.hash(newPassword, genSalt);
 
-      const updatedUser = await prisma.$primary().user.update({
+      const updatedUser = await prisma.user.update({
         where: { user_id: userId },
         data: { password: newHash },
       });
@@ -176,7 +176,7 @@ router.patch(
     try {
       const { email, newPassword } = req.body;
 
-      const existingUser = await prisma.$replica().user.findUnique({ where: { email } });
+      const existingUser = await prisma.user.findUnique({ where: { email } });
 
       if (!existingUser) {
         return res.status(404).json({ message: 'User not found' });
@@ -185,7 +185,7 @@ router.patch(
       const genSalt = await bcryptjs.genSalt();
       const newHash = await bcryptjs.hash(newPassword, genSalt);
 
-      const updatedUser = await prisma.$primary().user.update({
+      const updatedUser = await prisma.user.update({
         where: { email },
         data: { password: newHash },
       });
@@ -206,19 +206,16 @@ router.patch(
 
 router.delete('/delete', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // 1. Extract token
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       return res.status(401).json({ error: 'No token provided' });
     }
 
     const token = authHeader.replace('Bearer ', '');
-    // 2. Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthTokenPayload;
-    const userId = decoded.user.id; // adjust according to your payload structure
+    const userId = decoded.user.id;
 
-    // 3. Delete user (cascade will handle balance & transactions)
-    await prisma.$primary().user.delete({ where: { user_id: userId } });
+    await prisma.user.delete({ where: { user_id: userId } });
 
     return res.status(200).json({ message: 'User deleted successfully' });
   } catch (error) {

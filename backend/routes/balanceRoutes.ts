@@ -24,7 +24,7 @@ router.get(
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthTokenPayload;
       const userId = decoded.user.id;
 
-      const userBalance = await prisma.$replica().balance.findUnique({
+      const userBalance = await prisma.balance.findUnique({
         where: { user_id: userId },
       });
 
@@ -48,7 +48,7 @@ router.patch(
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthTokenPayload;
       const userId = decoded.user.id;
 
-      const updatedBalance = await prisma.$primary().balance.upsert({
+      const updatedBalance = await prisma.balance.upsert({
         where: { user_id: userId },
         update: { balance: { increment: req.body.delta } },
         create: {

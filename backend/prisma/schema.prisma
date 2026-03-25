@@ -37,9 +37,9 @@ model Balance {
 model Transaction {
   transaction_id      Int         @id @default(autoincrement())
   user_id             String
-  children_names      String[]
-  health_concerns     String[]
-  transaction_date    DateTime
+  children_names      Json
+  health_concerns     Json?
+  transaction_date    DateTime    @default(now())
   payment_type        String
   lesson_date         DateTime
   lesson_time         String
