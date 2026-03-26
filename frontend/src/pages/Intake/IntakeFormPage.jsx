@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { intakeSchema } from './intakeSchema';
 import { createChild } from '../../services/childService';
@@ -26,7 +26,6 @@ const TOTAL_STEPS = 4;
 function IntakeFormPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [submitError, setSubmitError] = useState(null);
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const methods = useForm({
