@@ -1,16 +1,217 @@
 # swimly-client
 
-Frontend for **Swimly** — a booking and management web app for children's swim schools. Built with React + Vite.
+A booking and management web app for children's swim schools (ages 0–5). Frontend and backend live in this repo.
 
 ---
 
 ## Tech Stack
 
-- **Framework:** React (Vite)
-- **Styling:** TBD
-- **State Management:** TBD
-- **Routing:** React Router
-- **Backend:** [`swimly-api`](https://github.com/atle-gang/swimly-api) — Express + Node.js
+**Frontend**
+- React 18 (Vite)
+- React Router v6
+- React Hook Form + Zod
+- Lucide React
+- CSS Modules
+- React Context (auth)
+- Vitest + Testing Library
+
+**Backend**
+- Express + Node.js + TypeScript
+- Prisma ORM
+- PostgreSQL via [Neon](https://neon.tech)
+- JWT auth (bcryptjs)
+
+---
+
+## Repo Structure
+
+```
+swimly-client/
+├── backend/                  # Express API
+│   ├── generated/prisma/     # Auto-generated Prisma client (do not edit)
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   ├── migrations/
+│   │   └── seed.ts
+│   ├── routes/
+│   │   ├── userRoutes.ts
+│   │   ├── balanceRoutes.ts
+│   │   ├── childRoutes.ts
+│   │   ├── lessonRoutes.ts
+│   │   ├── bookingRoutes.ts
+│   │   └── paymentRoutes.ts
+│   ├── client.ts             # Prisma client instance
+│   ├── server.ts             # Express entry point
+│   ├── prisma.config.ts
+│   ├── .env                  # Not committed
+│   └── .env.example
+└── frontend/                 # React app
+    ├── src/
+    │   ├── components/
+    │   │   ├── AppLayout/    # Wraps protected pages with BottomNav
+    │   │   ├── BottomNav/    # Book, Pricing, Profile tabs
+    │   │   ├── ProtectedRoute/
+    │   │   └── Skeleton/     # Shimmer loading states
+    │   ├── context/
+    │   │   ├── AuthContext.js
+    │   │   ├── AuthProvider.jsx
+    │   │   └── useAuth.js
+    │   ├── data/
+    │   │   └── bookingData.js
+    │   ├── pages/
+    │   │   ├── Booking/
+    │   │   ├── EditChild/
+    │   │   ├── Intake/
+    │   │   ├── Login/
+    │   │   ├── Pricing/
+    │   │   ├── Profile/
+    │   │   └── Registration/
+    │   ├── services/
+    │   │   ├── authService.js
+    │   │   ├── balanceService.js
+    │   │   ├── bookingService.js
+    │   │   ├── childService.js
+    │   │   ├── lessonService.js
+    │   │   └── paymentService.js
+    │   ├── test/
+    │   │   ├── setup.js
+    │   │   ├── utils/
+    │   │   └── validation/
+    │   ├── utils/
+    │   ├── App.jsx
+    │   └── main.jsx
+    ├── .env
+    └── .env.example
+```
+
+---
+
+## Pages
+
+| Page | Route | Auth |
+|---|---|---|
+| Login | `/login` | Public |
+| Register | `/register` | Public |
+| Intake Form | `/intake` | Protected |
+| Booking | `/booking` | Protected |
+| Pricing | `/pricing` | Protected |
+| Profile | `/profile` | Protected |
+| Edit Child | `/children/:id/edit` | Protected |
+
+**Flow:** Register → Intake Form → Booking → Profile / Pricing
+
+---
+
+## Getting Started
+
+### 1. Clone the repo
+
+```bash
+git clone git@github.com:atle-gang/swimly-client.git
+cd swimly-client
+```
+
+### 2. Set up the backend
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+```
+
+Open `backend/.env` and fill in your values:
+
+```env
+DATABASE_URL="postgresql://username:password@ep-xxxx.aws.neon.tech/neondb?sslmode=require"
+JWT_SECRET="your-secret-here"
+PORT=3000
+```
+
+Then run:
+
+```bash
+npx prisma migrate dev --name init
+npx prisma generate
+npx prisma db seed
+npm run dev
+```
+
+The API runs on `http://localhost:3000`.
+
+### 3. Set up the frontend
+
+Open a new terminal:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+```
+
+Open `frontend/.env`:
+
+```env
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+Then run:
+
+```bash
+npm run dev
+```
+
+The frontend runs on `http://localhost:5173`.
+
+---
+
+## Setting Up Neon (for testing)
+
+If you need your own database instance — for example to test schema changes without touching the shared dev database — here's how to set one up.
+
+### 1. Create a Neon project
+
+- Go to [neon.tech](https://neon.tech) and sign up or log in
+- Click **New Project**, name it `swimly-test` or similar
+- Once created, copy the connection string from the dashboard — it looks like:
+
+```
+postgresql://username:password@ep-xxxx.aws.neon.tech/neondb?sslmode=require
+```
+
+### 2. Update your `.env`
+
+```env
+DATABASE_URL="postgresql://username:password@ep-xxxx.aws.neon.tech/neondb?sslmode=require"
+```
+
+### 3. Run migrations and seed
+
+```bash
+npx prisma migrate reset             # wipes the database cleanly
+npx prisma migrate dev --name init   # creates all tables from the schema
+npx prisma generate                  # builds the typed Prisma client
+npx prisma db seed                   # seeds 14 days of lesson slots
+```
+
+### 4. Verify
+
+```bash
+npx prisma studio
+```
+
+Opens a browser UI at `http://localhost:5555` — you should see `Lesson` rows spread across multiple days and all 4 age groups.
+
+---
+
+## Running Tests
+
+From the `frontend` directory:
+
+```bash
+npm run test
+```
+
+Covers utility functions (`bookingUtils`, `intakeUtils`, `pricingUtils`) and Zod schema validation — including the nap time end-after-start rule and Rule of 4 logic.
 
 ---
 
@@ -20,40 +221,22 @@ Frontend for **Swimly** — a booking and management web app for children's swim
 main
 └── development
     ├── feature/your-feature-name
-    ├── feature/another-feature
-    └── fix/bug-description
+    ├── fix/bug-description
+    └── chore/tooling-change
 ```
 
 | Branch | Purpose |
 |---|---|
-| `main` | Production-ready code only. Never commit directly. |
+| `main` | Production-ready only. Never commit directly. |
 | `development` | Integration branch. All features merge here first. |
-| `feature/*` | One branch per feature or task. Branched off `development`. |
-| `fix/*` | Bug fixes. Branched off `development` (or `main` if hotfix). |
-
----
-
-## Getting Started
-
-```bash
-# Clone the repo
-git clone git@github.com:atle-gang/swimly-client.git
-cd swimly-client
-
-# Install dependencies
-npm install
-
-# Start dev server
-npm run dev
-```
+| `feature/*` | One branch per feature or task. Branch off `development`. |
+| `fix/*` | Bug fixes. Branch off `development`. |
 
 ---
 
 ## Development Workflow
 
 ### 1. Always start from `development`
-
-Before starting any new work, make sure you are on `development` and it is up to date.
 
 ```bash
 git checkout development
@@ -62,10 +245,8 @@ git pull origin development
 
 ### 2. Create a feature branch
 
-Branch names should be lowercase, hyphenated, and descriptive.
-
 ```bash
-git checkout -b feature/booking-page
+git checkout -b feature/your-feature
 ```
 
 **Naming conventions:**
@@ -76,109 +257,36 @@ git checkout -b feature/booking-page
 | `fix/` | Bug fix |
 | `chore/` | Config, dependencies, tooling |
 | `refactor/` | Code cleanup with no behaviour change |
+| `docs/` | README or documentation changes |
+| `test/` | Adding or updating tests |
 
-Examples:
-- `feature/booking-page`
-- `feature/intake-form-nap-times`
-- `fix/slot-card-overflow`
-- `chore/eslint-setup`
-
-### 3. Commit regularly with clear messages
-
-Follow this commit message format:
+### 3. Commit with clear messages
 
 ```
 type: short description of what changed
 ```
 
-Examples:
-```bash
-git commit -m "feat: add booking page slot cards"
-git commit -m "fix: correct nap time picker overflow on mobile"
-git commit -m "chore: add react-router-dom"
-git commit -m "refactor: extract SlotCard into its own component"
-```
+Types: `feat`, `fix`, `chore`, `refactor`, `style`, `docs`, `test`
 
-Types: `feat`, `fix`, `chore`, `refactor`, `style`, `docs`
-
-### 4. Push your feature branch
+### 4. Push and open a PR into `development`
 
 ```bash
-git push -u origin feature/booking-page
+git push -u origin feature/your-feature
 ```
 
-### 5. Open a Pull Request into `development`
-
-- Go to the repo on GitHub
-- Open a PR from your feature branch **into `development`** (not `main`)
-- Give the PR a clear title — e.g. `feat: booking page`
-- Leave a short description of what was built or changed
-- Request a review from your teammate if applicable
-- Do not merge your own PR without a second pair of eyes if working with a teammate
-
-### 6. Merging into `main`
-
-Once `development` is stable and a feature set is complete:
-
-- Open a PR from `development` into `main`
-- Both teammates should review before merging
-- Merge using **Squash and merge** or **Merge commit** — pick one and stay consistent
-- After merging, do not delete `development`
+- Open a PR into `development`, not `main`
+- Do not merge your own PR
 
 ---
 
 ## Rules
 
-- **Never push directly to `main`**
-- **Never push directly to `development`** — always go through a feature branch and PR
-- **Delete feature branches after merging** — keep the branch list clean
-- **Pull `development` before starting new work** — avoid merge conflicts
-- **One feature per branch** — do not bundle unrelated changes
+- **Never push directly to `main` or `development`**
+- **Delete feature branches after merging**
+- **Pull `development` before starting new work**
+- **Never commit `.env`**
 
 ---
-
-## Project Structure (planned)
-
-```
-swimly-client/
-├── public/
-├── src/
-│   ├── assets/
-│   ├── components/       # Reusable UI components
-│   ├── pages/            # One folder per page/route
-│   │   ├── Booking/
-│   │   ├── Pricing/
-│   │   ├── About/
-│   │   ├── Profile/
-│   │   └── Home/
-│   ├── hooks/            # Custom React hooks
-│   ├── services/         # API call functions
-│   ├── context/          # React context / global state
-│   ├── utils/            # Helper functions
-│   ├── App.jsx
-│   └── main.jsx
-<!-- ├── .env.example -->
-├── .gitignore
-├── index.html
-├── vite.config.js
-└── README.md
-```
-
----
-
-<!-- ## Environment Variables
-
-Copy `.env.example` to `.env` and fill in your values. Never commit `.env`.
-
-```bash
-cp .env.example .env
-```
-
-```env
-VITE_API_BASE_URL=http://localhost:5000/api
-```
-
---- -->
 
 ## Contributors
 
