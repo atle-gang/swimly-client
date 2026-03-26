@@ -1,4 +1,3 @@
-// routes/userRoutes.ts
 import { Router, Request, Response, NextFunction } from 'express';
 import { config } from 'dotenv';
 const jwt = require('jsonwebtoken');

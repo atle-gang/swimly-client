@@ -19,7 +19,6 @@ app.use(cors({ allowedHeaders: ['Authorization', 'Content-Type'] }));
 
 app.use('/swimly-api/user', userRoutes);
 app.use('/swimly-api/user/balance', balanceRoutes);
-app.use('/swimly-api/user/balance', balanceRoutes);
 app.use('/swimly-api/children', childRoutes);
 app.use('/swimly-api/lessons',  lessonRoutes);
 app.use('/swimly-api/bookings', bookingRoutes);
