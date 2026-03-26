@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec ts-node ./server.ts"
+    "dev": "nodemon --exec ts-node ./server.ts",
+    "migrate":  "prisma migrate dev",
+    "generate": "prisma generate",
+    "studio":   "prisma studio",
+    "seed":     "tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
