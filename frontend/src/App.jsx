@@ -8,6 +8,7 @@ import PricingPage from "./pages/Pricing/PricingPage"
 import ProfilePage from "./pages/Profile/ProfilePage"
 import RegistrationPage from "./pages/Registration/RegistrationPage"
 import LoginPage from "./pages/Login/LoginPage"
+import EditChildPage from "./pages/EditChild/EditChildPage"
 
 function ProtectedLayout({ children }) {
   return (
@@ -59,6 +60,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <IntakeFormPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/children/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditChildPage />
               </ProtectedRoute>
             }
           />
