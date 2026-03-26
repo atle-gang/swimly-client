@@ -1,44 +1,64 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider } from "./context/AuthProvider"
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"
+import AppLayout from "./components/AppLayout/AppLayout"
 import BookingPage from "./pages/Booking/BookingPage"
 import IntakeFormPage from "./pages/Intake/IntakeFormPage"
 import PricingPage from "./pages/Pricing/PricingPage"
+import ProfilePage from "./pages/Profile/ProfilePage"
 import RegistrationPage from "./pages/Registration/RegistrationPage"
 import LoginPage from "./pages/Login/LoginPage"
+
+function ProtectedLayout({ children }) {
+  return (
+    <ProtectedRoute>
+      <AppLayout>{children}</AppLayout>
+    </ProtectedRoute>
+  )
+}
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public routes */}
+          {/* Public routes — no nav */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
 
-          {/* Protected routes — require authentication */}
-          <Route
-            path="/intake"
-            element={
-              <ProtectedRoute>
-                <IntakeFormPage />
-              </ProtectedRoute>
-            }
-          />
+          {/* Protected routes — have BottomNav */}
           <Route
             path="/booking"
             element={
-              <ProtectedRoute>
+              <ProtectedLayout>
                 <BookingPage />
-              </ProtectedRoute>
+              </ProtectedLayout>
             }
           />
           <Route
             path="/pricing"
             element={
-              <ProtectedRoute>
+              <ProtectedLayout>
                 <PricingPage />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedLayout>
+                <ProfilePage />
+              </ProtectedLayout>
+            }
+          />
+
+          {/* Intake is protected but has no BottomNav — it's a full screen flow */}
+          <Route
+            path="/intake"
+            element={
+              <ProtectedRoute>
+                <IntakeFormPage />
               </ProtectedRoute>
             }
           />
