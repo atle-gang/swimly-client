@@ -1,44 +1,90 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 import ChildSelector from './components/ChildSelector/ChildSelector';
-import FilterStrip    from './components/FilterStrip/FilterStrip';
-import DaySelector    from './components/DaySelector/DaySelector';
-import SlotList       from './components/SlotList/SlotList';
-import BookingFooter  from './components/BookingFooter/BookingFooter';
+import FilterStrip   from './components/FilterStrip/FilterStrip';
+import DaySelector   from './components/DaySelector/DaySelector';
+import SlotList      from './components/SlotList/SlotList';
+import BookingFooter from './components/BookingFooter/BookingFooter';
 
-import {
-  MOCK_CHILD,
-  MOCK_SLOTS,
-  TIME_FILTERS,
-  generateWeekDays,
-} from '../../data/bookingData';
-
+import { TIME_FILTERS, generateWeekDays } from '../../data/bookingData';
 import { filterSlots } from '../../utils/bookingUtils';
+import { getChildren } from '../../services/childService';
+import { getLessons  } from '../../services/lessonService';
+import { createBooking } from '../../services/bookingService';
+
+import { SlotCardSkeleton } from '../../components/Skeleton/Skeleton';
 import styles from './BookingPage.module.css';
 
-// Generate once — days are based on today's date and won't change mid-session
 const WEEK_DAYS = generateWeekDays();
 
 function BookingPage() {
-  const [selectedDay, setSelectedDay]       = useState(0);
-  const [activeFilter, setActiveFilter]     = useState('all');
+  // ── State ──────────────────────────────────────────────
+  const [selectedDay,    setSelectedDay]    = useState(0);
+  const [activeFilter,   setActiveFilter]   = useState('all');
   const [selectedSlotId, setSelectedSlotId] = useState(null);
 
-  // useMemo avoids re-filtering on every render when unrelated state changes
+  const [child,        setChild]        = useState(null);
+  const [slots,        setSlots]        = useState([]);
+  const [isLoading,    setIsLoading]    = useState(true);
+  const [error,        setError]        = useState(null);
+  const [bookingError, setBookingError] = useState(null);
+  const [isBooking,    setIsBooking]    = useState(false);
+
+  // ── Load child and lessons when selected day changes ──
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        // Load the user's first child profile
+        // Later this becomes a child selector when multiple children are supported
+        const { children } = await getChildren();
+        if (children.length > 0) {
+          const c = children[0];
+          setChild({
+            id:            c.child_id,
+            name:          c.name,
+            ageGroup:      c.experience_level,
+            ageGroupRange: '',
+            dateOfBirth:   c.date_of_birth,
+          });
+        }
+
+        // Build ISO date string for the selected day
+        const date = new Date();
+        date.setDate(date.getDate() + selectedDay);
+        const dateStr = date.toISOString().split('T')[0];
+
+        const { slots: fetchedSlots } = await getLessons({ date: dateStr });
+
+        // Map backend response to the shape the slot components expect
+        setSlots(
+          fetchedSlots.map((s) => ({ ...s, dayIndex: selectedDay }))
+        );
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadData();
+  }, [selectedDay]);
+
+  // ── Derived data ───────────────────────────────────────
   const visibleSlots = useMemo(
-    () => filterSlots(MOCK_SLOTS, activeFilter, selectedDay),
-    [activeFilter, selectedDay]
+    () => filterSlots(slots, activeFilter, selectedDay),
+    [slots, activeFilter, selectedDay]
   );
 
   const selectedSlot = useMemo(
-    () => MOCK_SLOTS.find((s) => s.id === selectedSlotId) ?? null,
-    [selectedSlotId]
+    () => slots.find((s) => s.id === selectedSlotId) ?? null,
+    [slots, selectedSlotId]
   );
 
   // ── Handlers ───────────────────────────────────────────
   function handleDayChange(dayIndex) {
     setSelectedDay(dayIndex);
-    // Clear selection when the day changes to avoid confusion
     setSelectedSlotId(null);
   }
 
@@ -48,60 +94,101 @@ function BookingPage() {
   }
 
   function handleSlotSelect(slotId) {
-    // Toggle off if the same slot is tapped again
     setSelectedSlotId((prev) => (prev === slotId ? null : slotId));
+    setBookingError(null);
   }
 
-  function handleConfirm() {
-    // Placeholder — will navigate to payment page in a later sprint
-    alert(`Booking confirmed for slot ${selectedSlotId}! Payment flow coming soon.`);
+  async function handleConfirm() {
+    if (!selectedSlot || !child) return;
+    setIsBooking(true);
+    setBookingError(null);
+
+    try {
+      await createBooking({ childId: child.id, lessonId: selectedSlot.id });
+      alert('Lesson booked successfully!');
+      setSelectedSlotId(null);
+    } catch (err) {
+      // Show error inline so the user does not lose their selection
+      setBookingError(err.message);
+    } finally {
+      setIsBooking(false);
+    }
   }
 
-  // ── Render ────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────
   return (
     <div className={styles.page}>
-      {/* Page header */}
       <header className={styles.header}>
         <h1 className={styles.pageTitle}>Book a Class</h1>
       </header>
 
-      {/* Scrollable content area */}
       <main className={styles.content}>
 
-        {/* Child context strip */}
-        <ChildSelector child={MOCK_CHILD} />
+        {/* Show child selector when loaded, skeleton strip while loading */}
+        {child && !isLoading
+          ? <ChildSelector child={child} />
+          : isLoading && (
+            <div style={{ background: 'var(--color-navy)', padding: '22px 20px 26px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
+                <div>
+                  <div style={{ width: 60, height: 10, borderRadius: 6, background: 'rgba(255,255,255,0.15)', marginBottom: 8 }} />
+                  <div style={{ width: 140, height: 16, borderRadius: 6, background: 'rgba(255,255,255,0.2)' }} />
+                  <div style={{ width: 100, height: 11, borderRadius: 6, background: 'rgba(255,255,255,0.12)', marginTop: 6 }} />
+                </div>
+              </div>
+            </div>
+          )
+        }
 
-        {/* Time-of-day filter pills */}
+        {error && (
+          <p style={{ padding: '12px 20px', fontSize: '13px', color: 'var(--color-red)' }}>
+            {error}
+          </p>
+        )}
+
         <FilterStrip
           filters={TIME_FILTERS}
           activeFilter={activeFilter}
           onFilterChange={handleFilterChange}
         />
 
-        {/* Day selection strip */}
         <DaySelector
           days={WEEK_DAYS}
           selectedDay={selectedDay}
           onDayChange={handleDayChange}
         />
 
-        {/* Slot cards */}
-        <SlotList
-          slots={visibleSlots}
-          sectionTitle={WEEK_DAYS[selectedDay]?.fullLabel ?? ''}
-          selectedSlotId={selectedSlotId}
-          onSlotSelect={handleSlotSelect}
-        />
+        {isLoading ? (
+          <div style={{ paddingTop: '8px' }}>
+            <SlotCardSkeleton />
+            <SlotCardSkeleton />
+            <SlotCardSkeleton />
+          </div>
+        ) : (
+          <SlotList
+            slots={visibleSlots}
+            sectionTitle={WEEK_DAYS[selectedDay]?.fullLabel ?? ''}
+            selectedSlotId={selectedSlotId}
+            onSlotSelect={handleSlotSelect}
+          />
+        )}
+
+        {bookingError && (
+          <p style={{ padding: '8px 20px', fontSize: '13px', color: 'var(--color-red)', textAlign: 'center' }}>
+            {bookingError}
+          </p>
+        )}
 
         <div className={styles.footerSpacer} />
       </main>
 
-      {/* Sticky confirm footer — only renders when a slot is selected */}
       <BookingFooter
         selectedSlot={selectedSlot}
-        child={MOCK_CHILD}
+        child={child}
         dayLabel={WEEK_DAYS[selectedDay]?.fullLabel ?? ''}
         onConfirm={handleConfirm}
+        isLoading={isBooking}
       />
     </div>
   );

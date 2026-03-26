@@ -4,16 +4,19 @@
   min-height: 100dvh;
   background-color: var(--color-white);
   /* Constrain to a max width on large screens and centre */
+  width: 100%;
   max-width: 480px;
   margin: 0 auto;
   /* Subtle shadow on wide screens to frame the mobile layout */
   box-shadow: var(--shadow-md);
 }
 
+/* Page-level header with the title */
 .header {
   padding: 14px var(--space-xl) var(--space-sm);
   background-color: var(--color-white);
   border-bottom: 1px solid var(--color-grey-2);
+  /* Stays at the top while content scrolls */
   position: sticky;
   top: 0;
   z-index: 10;
@@ -25,18 +28,24 @@
   color: var(--color-navy);
 }
 
+/* Scrollable main area */
 .content {
   flex: 1;
   overflow-y: auto;
+  /* Smooth scroll on iOS */
   -webkit-overflow-scrolling: touch;
 }
 
+/* Extra bottom padding so the last slot card
+   doesn't hide under the sticky footer when selected */
 .footerSpacer {
   height: 120px;
 }
 
+/* ── Desktop enhancements ── */
 @media (min-width: 768px) {
   .page {
+    /* Give the card-like frame a bit of top margin on desktop */
     margin-top: 32px;
     border-radius: var(--radius-lg);
     min-height: auto;
@@ -45,6 +54,7 @@
   }
 
   .content {
+    /* Re-enable scroll inside the fixed-height container */
     overflow-y: auto;
   }
 }

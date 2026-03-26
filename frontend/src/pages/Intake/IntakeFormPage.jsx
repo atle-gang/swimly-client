@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { intakeSchema } from './intakeSchema';
+import { createChild } from '../../services/childService';
 import FormProgress from './components/FormProgress/FormProgress';
 import FormNav      from './components/FormNav/FormNav';
 import BasicsStep      from './components/steps/BasicsStep/BasicsStep';
@@ -24,7 +25,7 @@ const TOTAL_STEPS = 4;
 
 function IntakeFormPage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [searchParams] = useSearchParams();
+  const [submitError, setSubmitError] = useState(null);
   const navigate = useNavigate();
 
   const methods = useForm({
@@ -68,13 +69,13 @@ function IntakeFormPage() {
     }
   }
 
-  function onSubmit(data) {
-    // TODO: replace with API call — e.g. POST /api/children
-    console.log('Intake form submitted:', data);
-
-    // If the user came from the booking page, return them there
-    const returnTo = searchParams.get('returnTo') ?? '/booking';
-    navigate(returnTo);
+  async function onSubmit(data) {
+    try {
+      await createChild(data);
+      navigate('/booking');
+    } catch (err) {
+      setSubmitError(err.message);
+    }
   }
 
   return (
@@ -98,6 +99,13 @@ function IntakeFormPage() {
           </div>
         </main>
       </FormProvider>
+
+      {/* Submit error — shown on review step if API call fails */}
+      {submitError && (
+        <p style={{ padding: '0 20px 8px', fontSize: '13px', color: 'var(--color-red)', textAlign: 'center' }}>
+          {submitError}
+        </p>
+      )}
 
       {/* Sticky nav footer */}
       <FormNav

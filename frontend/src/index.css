@@ -116,3 +116,19 @@ a {
   display: flex;
   flex-direction: column;
 }
+
+/* ── Page container ──────────────────────────────────────
+   Ensures all pages fill the available width consistently.
+   Without explicit width, flex children shrink to content
+   width on wider screens causing narrow layouts on pages
+   with less content (login, intake steps). */
+.page-container {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+}
