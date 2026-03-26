@@ -139,4 +139,69 @@ router.get(
   },
 );
 
+/**
+ * PATCH /swimly-api/children/:id
+ * Updates the editable fields of a child profile.
+ * Name and date of birth are intentionally excluded — these do not change.
+ */
+router.patch(
+  '/:id',
+  async (req: Request<{ id: string }, any, Partial<CreateChildBody>>, res: Response, next: NextFunction) => {
+    try {
+      const authHeader = req.header('Authorization');
+      const token = authHeader!.replace('Bearer ', '');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthTokenPayload;
+      const userId = decoded.user.id;
+ 
+      const childId = req.params.id as string;
+ 
+      // Verify the child belongs to the authenticated user
+      const existing = await prisma.child.findFirst({
+        where: { child_id: childId, user_id: userId },
+      });
+ 
+      if (!existing) {
+        return res.status(404).json({ message: 'Child not found' });
+      }
+ 
+      const { experienceLevel, medicalFlags, additionalNotes, napTimes } = req.body;
+ 
+      if (napTimes && napTimes.length > 3) {
+        return res.status(400).json({ message: 'Maximum of 3 nap times allowed' });
+      }
+ 
+      // Update child and replace nap times in one transaction
+      const updated = await prisma.$transaction(async (tx) => {
+        // Delete existing nap times and recreate — simplest way to handle
+        // additions, removals and edits without diffing
+        if (napTimes !== undefined) {
+          await tx.napTime.deleteMany({ where: { child_id: childId } });
+        }
+ 
+        return tx.child.update({
+          where: { child_id: childId },
+          data: {
+            ...(experienceLevel !== undefined && { experience_level: experienceLevel }),
+            ...(medicalFlags    !== undefined && { medical_flags:    medicalFlags    }),
+            ...(additionalNotes !== undefined && { additional_notes: additionalNotes }),
+            ...(napTimes !== undefined && {
+              nap_times: {
+                create: napTimes.map((nap) => ({
+                  start_time: nap.start,
+                  end_time:   nap.end,
+                })),
+              },
+            }),
+          },
+          include: { nap_times: true },
+        });
+      });
+ 
+      return res.status(200).json({ child: updated });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 export { router as childRoutes };
