@@ -1,4 +1,4 @@
-import SlotCard from '../SlotCard/Slotcard';
+import SlotCard from '../SlotCard/SlotCard';
 import styles from './SlotList.module.css';
 
 /**
