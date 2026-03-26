@@ -12,6 +12,7 @@ import { getChildren } from '../../services/childService';
 import { getLessons  } from '../../services/lessonService';
 import { createBooking } from '../../services/bookingService';
 
+import { SlotCardSkeleton } from '../../components/Skeleton/Skeleton';
 import styles from './BookingPage.module.css';
 
 const WEEK_DAYS = generateWeekDays();
@@ -123,13 +124,22 @@ function BookingPage() {
 
       <main className={styles.content}>
 
-        {isLoading && (
-          <div style={{ padding: '16px 20px', background: 'var(--color-navy)' }}>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>Loading…</p>
-          </div>
-        )}
-
-        {child && !isLoading && <ChildSelector child={child} />}
+        {/* Show child selector when loaded, skeleton strip while loading */}
+        {child && !isLoading
+          ? <ChildSelector child={child} />
+          : isLoading && (
+            <div style={{ background: 'var(--color-navy)', padding: '22px 20px 26px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
+                <div>
+                  <div style={{ width: 60, height: 10, borderRadius: 6, background: 'rgba(255,255,255,0.15)', marginBottom: 8 }} />
+                  <div style={{ width: 140, height: 16, borderRadius: 6, background: 'rgba(255,255,255,0.2)' }} />
+                  <div style={{ width: 100, height: 11, borderRadius: 6, background: 'rgba(255,255,255,0.12)', marginTop: 6 }} />
+                </div>
+              </div>
+            </div>
+          )
+        }
 
         {error && (
           <p style={{ padding: '12px 20px', fontSize: '13px', color: 'var(--color-red)' }}>
@@ -149,12 +159,20 @@ function BookingPage() {
           onDayChange={handleDayChange}
         />
 
-        <SlotList
-          slots={visibleSlots}
-          sectionTitle={WEEK_DAYS[selectedDay]?.fullLabel ?? ''}
-          selectedSlotId={selectedSlotId}
-          onSlotSelect={handleSlotSelect}
-        />
+        {isLoading ? (
+          <div style={{ paddingTop: '8px' }}>
+            <SlotCardSkeleton />
+            <SlotCardSkeleton />
+            <SlotCardSkeleton />
+          </div>
+        ) : (
+          <SlotList
+            slots={visibleSlots}
+            sectionTitle={WEEK_DAYS[selectedDay]?.fullLabel ?? ''}
+            selectedSlotId={selectedSlotId}
+            onSlotSelect={handleSlotSelect}
+          />
+        )}
 
         {bookingError && (
           <p style={{ padding: '8px 20px', fontSize: '13px', color: 'var(--color-red)', textAlign: 'center' }}>
