@@ -4,6 +4,7 @@ import { LogOut, Plus, User, Baby, CalendarDays, X, ChevronRight } from 'lucide-
 import { useAuth } from '../../context/useAuth';
 import { getChildren } from '../../services/childService';
 import { getBookings, cancelBooking } from '../../services/bookingService';
+import { ChildCardSkeleton, BookingCardSkeleton } from '../../components/Skeleton/Skeleton';
 import styles from './ProfilePage.module.css';
 
 function ProfilePage() {
@@ -113,7 +114,10 @@ function ProfilePage() {
           </div>
 
           {isLoading ? (
-            <p className={styles.emptyMsg}>Loading…</p>
+            <div className={styles.list}>
+              <ChildCardSkeleton />
+              <ChildCardSkeleton />
+            </div>
           ) : children.length === 0 ? (
             <div className={styles.emptyCard}>
               <p className={styles.emptyMsg}>No child profiles yet.</p>
@@ -156,7 +160,11 @@ function ProfilePage() {
           </div>
 
           {isLoading ? (
-            <p className={styles.emptyMsg}>Loading…</p>
+            <div className={styles.list}>
+              <BookingCardSkeleton />
+              <BookingCardSkeleton />
+              <BookingCardSkeleton />
+            </div>
           ) : bookings.length === 0 ? (
             <div className={styles.emptyCard}>
               <p className={styles.emptyMsg}>No upcoming bookings.</p>
