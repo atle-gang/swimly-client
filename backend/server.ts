@@ -2,9 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 const express = require('express');
 const cors = require('cors');
 import helmet from 'helmet';
-import { userRoutes } from './routes/userRoutes.ts';
-import { balanceRoutes } from './routes/balanceRoutes.ts';
-import { transactionRoutes } from './routes/transactionRoutes.ts';
+import { userRoutes    } from './routes/userRoutes';
+import { balanceRoutes } from './routes/balanceRoutes';
+import { childRoutes   } from './routes/childRoutes';
+import { lessonRoutes  } from './routes/lessonRoutes';
+import { bookingRoutes } from './routes/bookingRoutes';
+import { paymentRoutes } from './routes/paymentRoutes';
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const app = express();
@@ -16,7 +19,11 @@ app.use(cors({ allowedHeaders: ['Authorization', 'Content-Type'] }));
 
 app.use('/swimly-api/user', userRoutes);
 app.use('/swimly-api/user/balance', balanceRoutes);
-app.use('/swimly-api/user/transactions', transactionRoutes);
+app.use('/swimly-api/user/balance', balanceRoutes);
+app.use('/swimly-api/children', childRoutes);
+app.use('/swimly-api/lessons',  lessonRoutes);
+app.use('/swimly-api/bookings', bookingRoutes);
+app.use('/swimly-api/payments', paymentRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('Error:', err);
