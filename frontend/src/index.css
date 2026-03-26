@@ -1,68 +1,134 @@
+/* ── Google Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Design tokens ── */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Brand colours */
+  --color-navy:     #0d2137;
+  --color-teal:     #1a7a8a;
+  --color-teal-lt:  #e6f4f6;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Semantic status */
+  --color-amber:    #e8a44a;
+  --color-amber-lt: #fef3dc;
+  --color-green:    #2d7a55;
+  --color-green-lt: #e6f3ec;
+  --color-red:      #c94b3a;
+  --color-red-lt:   #fdecea;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Neutrals */
+  --color-white:  #ffffff;
+  --color-grey-1: #f7f8fa;
+  --color-grey-2: #eceef2;
+  --color-grey-3: #c8cdd8;
+  --color-grey-4: #7e8898;
+  --color-grey-5: #3d4654;
+
+  /* Typography */
+  --font-family:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-size-xs:   11px;
+  --font-size-sm:   12px;
+  --font-size-base: 14px;
+  --font-size-md:   15px;
+  --font-size-lg:   17px;
+  --font-size-xl:   20px;
+  --font-size-2xl:  24px;
+
+  /* Spacing */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  12px;
+  --space-lg:  16px;
+  --space-xl:  20px;
+  --space-2xl: 24px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 100px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 4px rgba(13, 33, 55, 0.08);
+  --shadow-md: 0 4px 16px rgba(13, 33, 55, 0.10);
+
+  /* Layout */
+  --page-padding: 0 var(--space-xl);
+  --bottom-nav-height: 64px;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+/* ── Reset ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-a:hover {
-  color: #535bf2;
+
+html {
+  /* Prevent font size inflation on iOS */
+  -webkit-text-size-adjust: 100%;
+  font-size: 16px;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--color-navy);
+  background-color: var(--color-grey-1);
+  line-height: 1.5;
+  /* Smooth scrolling throughout */
+  scroll-behavior: smooth;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Remove default list styles */
+ul,
+ol {
+  list-style: none;
 }
 
+/* Remove default button styles — components add their own */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  border: none;
+  background: none;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Make images responsive by default */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Remove default anchor underlines */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ── App layout shell ── */
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Page container ──────────────────────────────────────
+   Ensures all pages fill the available width consistently.
+   Without explicit width, flex children shrink to content
+   width on wider screens causing narrow layouts on pages
+   with less content (login, intake steps). */
+.page-container {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
 }

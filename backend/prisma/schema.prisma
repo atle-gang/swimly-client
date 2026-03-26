@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  user_id    String    @id @default(cuid())
+  name       String    @db.VarChar(256)
+  surname    String    @db.VarChar(256)
+  username   String    @unique @db.VarChar(256)
+  email      String    @unique @db.VarChar(256)
+  password   String    @db.VarChar(256)
+  balance    Balance?
+  children   Child[]
+  payments   Payment[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model Balance {
+  balance_id  Int       @id @default(autoincrement())
+  user_id     String    @unique
+  user        User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  balance     Int       @default(0)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+}
+
+model Child {
+  child_id         String    @id @default(cuid())
+  user_id          String
+  user             User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  name             String    @db.VarChar(256)
+  date_of_birth    DateTime
+  experience_level String    @db.VarChar(64)
+  medical_flags    String[]
+  additional_notes String?   @db.VarChar(500)
+  nap_times        NapTime[]
+  bookings         Booking[]
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  @@index([user_id])
+}
+
+model NapTime {
+  nap_time_id String   @id @default(cuid())
+  child_id    String
+  child       Child    @relation(fields: [child_id], references: [child_id], onDelete: Cascade)
+  start_time  String   @db.VarChar(5)
+  end_time    String   @db.VarChar(5)
+  created_at  DateTime @default(now())
+
+  @@index([child_id])
+}
+
+model Lesson {
+  lesson_id    String    @id @default(cuid())
+  class_name   String    @db.VarChar(256)
+  instructor   String    @db.VarChar(256)
+  lesson_date  DateTime
+  lesson_time  String    @db.VarChar(5)
+  duration_min Int       @default(30)
+  max_capacity Int       @default(4)
+  price_rands  Decimal   @db.Decimal(10, 2)
+  age_group    String    @db.VarChar(64)
+  bookings     Booking[]
+  created_at   DateTime  @default(now())
+
+  @@index([lesson_date])
+  @@index([age_group])
+}
+
+model Booking {
+  booking_id String        @id @default(cuid())
+  child_id   String
+  child      Child         @relation(fields: [child_id], references: [child_id], onDelete: Cascade)
+  lesson_id  String
+  lesson     Lesson        @relation(fields: [lesson_id], references: [lesson_id], onDelete: Cascade)
+  status     BookingStatus @default(CONFIRMED)
+  created_at DateTime      @default(now())
+  updated_at DateTime      @updatedAt
+
+  @@unique([child_id, lesson_id])
+  @@index([lesson_id])
+  @@index([child_id])
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+model Payment {
+  payment_id    String      @id @default(cuid())
+  user_id       String
+  user          User        @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  payment_type  PaymentType
+  amount_rands  Decimal     @db.Decimal(10, 2)
+  credits_added Int         @default(0)
+  description   String      @db.VarChar(256)
+  created_at    DateTime    @default(now())
+
+  @@index([user_id])
+}
+
+enum PaymentType {
+  SINGLE_LESSON
+  CREDIT_PACK
+}
