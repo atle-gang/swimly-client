@@ -1,14 +1,14 @@
-// src/pages/Login/LoginPage.jsx
-// Login form wired to the backend via authService.
-
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import styles from './LoginPage.module.css';
 
 function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Redirect back to the page the user was trying to access before login
+  const from = location.state?.from ?? '/booking';
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError]       = useState(null);
@@ -33,7 +33,7 @@ function LoginPage() {
 
     try {
       await login({ email, password });
-      navigate('/booking');
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
